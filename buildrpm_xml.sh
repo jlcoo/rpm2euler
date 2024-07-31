@@ -27,7 +27,7 @@ while read -r rpm_file; do
     package_xml="https://mirrors.ustc.edu.cn/fedora/releases/40/Everything/source/tree/$rpm_file"
     package=$(basename "$SRC_RPM")
     if [ -f "$package" ]; then
-        echo "正在构建 $(basename "$package")..."
+        echo "正在构建 $package..."
         pkg_name=`python match.py $package`
 
         ./build_one_xml_rpm.sh $package_xml 2>&1 | tee "$LOG_DIR/$pkg_name.log"

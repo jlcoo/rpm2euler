@@ -15,6 +15,7 @@ SRC_RPM_DIR="."
 
 # 指定要检查的目录路径
 LOG_DIR="$WORKDIR/logs"
+BUILD_SPEC="$WORKDIR/SPECS"
 
 # 检查目录是否存在
 if [ ! -d "$LOG_DIR" ]; then
@@ -27,8 +28,15 @@ fi
 for package in "$SRC_RPM_DIR"/*.src.rpm
 do
     if [ -f "$package" ]; then
-        echo "正在构建 $(basename "$package")..."
         pkg_name=`python match.py $package`
+        if [ -f "$BUILD_SPEC/$pkg_name.spec" ]; then
+            success=`grep "编译构建软件包成功" ~/rpmbuild/logs/$pkg_name.log | wc -l`
+            if [ "$success" -eq 1 ]; then
+                echo "$package 已经构建成功，不用重复构建"
+                continue
+            fi
+        fi
+        echo "正在构建 $(basename "$package")..."
 
         ./build_one_rpm.sh $package 2>&1 | tee "$LOG_DIR/$pkg_name.log"
     fi
