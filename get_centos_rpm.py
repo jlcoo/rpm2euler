@@ -6,7 +6,15 @@ from packaging.version import parse
 from packaging.version import Version
 
 # Base URL of the CentOS Stream source packages directory
-base_url = "https://mirror.stream.centos.org/9-stream/AppStream/source/tree/Packages/"
+base_urls = [
+    "https://mirror.stream.centos.org/9-stream/AppStream/source/tree/Packages/",
+    "https://mirror.stream.centos.org/9-stream/BaseOS/source/tree/Packages/",
+    "https://mirror.stream.centos.org/9-stream/CRB/source/tree/Packages/",
+    "https://mirror.stream.centos.org/9-stream/HighAvailability/source/tree/Packages/",
+    # "https://mirror.stream.centos.org/9-stream/NFV/source/tree/Packages/",
+    "https://mirror.stream.centos.org/9-stream/RT/source/tree/Packages/",
+    "https://mirror.stream.centos.org/9-stream/ResilientStorage/source/tree/Packages/",
+]
 
 # Directory to save downloaded files
 download_dir = "downloaded_one_packages"
@@ -52,23 +60,31 @@ def filter_latest_versions(src_rpm_links):
     for link in src_rpm_links:
         filename = link.split('/')[-1]
         name, version = parse_rpm_filename(filename)
-        print(f"Found name {name} {version} src.rpm files.")
+        # print(f"Found name {name} {version} src.rpm files.")
         if name:
             if name not in latest_versions or version > latest_versions[name][1]:
                 latest_versions[name] = (link, version)
     return [info[0] for info in latest_versions.values()]
 
 def main():
-    src_rpm_links = get_src_rpm_links(base_url)
-    print(f"Found {len(src_rpm_links)} src.rpm files.")
-    
-    latest_src_rpm_links = filter_latest_versions(src_rpm_links)
-    print(f"Downloading {len(latest_src_rpm_links)} latest src.rpm files.")
-    
-    for link in latest_src_rpm_links:
-        print(f"Downloading {link} ...")
-        download_file(link, download_dir)
-        print(f"Downloaded {link}")
+    total = 0
+    # 将结果写入到文件中
+    with open('centos10-stream.txt', 'w', encoding='utf-8') as file:
+        for base_url in base_urls:
+            src_rpm_links = get_src_rpm_links(base_url)
+            print(f"Found {len(src_rpm_links)} src.rpm files.")
+            latest_src_rpm_links = filter_latest_versions(src_rpm_links)
+            print(f"Downloading {len(latest_src_rpm_links)} latest src.rpm files.")
+            total = total + len(latest_src_rpm_links)
+            for rpm in sorted(latest_src_rpm_links):
+                file.write(rpm + '\n')
+
+    print(f"找到的src.rpm链接数量：{total}")
+
+    # for link in latest_src_rpm_links:
+    #     print(f"Downloading {link} ...")
+    #     download_file(link, download_dir)
+    #     print(f"Downloaded {link}")
 
 if __name__ == "__main__":
     main()
