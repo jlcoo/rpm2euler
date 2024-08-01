@@ -20,14 +20,25 @@ if [ ! -d "$LOG_DIR" ]; then
     echo "Directory created: $LOG_DIR"
 fi
 
+# while read -r spec_fine; do
+#     pkg_name=`basename $spec_fine .spec`
+#     success=`grep "编译构建软件包成功" $LOG_DIR/$pkg_name.log | wc -l`
+#     if [ "$success" -eq 1 ]; then
+#         echo "$spec_fine 已经构建成功，不用重复构建"
+#         continue
+#     fi
+#     ./build_one_spec.sh $spec_fine 2>&1 | tee "$LOG_DIR/$pkg_name.log"
+# done < $SRC_RPM
+# 以 6 并发运行
 while read -r spec_fine; do
-    pkg_name=`basename $spec_fine .spec`
-    success=`grep "编译构建软件包成功" $LOG_DIR/$pkg_name.log | wc -l`
-    if [ "$success" -eq 1 ]; then
-        echo "$spec_fine 已经构建成功，不用重复构建"
-        continue
+    echo "$spec_fine"
+done < "$SRC_RPM" | xargs -n 1 -P 6 -r bash -c '
+    spec_fine="$0"; 
+    pkg_name="$(basename "$spec_fine" .spec)"; 
+    success="$(grep "编译构建软件包成功" "$LOG_DIR/$pkg_name.log" | wc -l)";
+    if [ "$success" -ne 1 ]; then 
+        ./build_one_spec.sh "$spec_fine" 2>&1 | tee "$LOG_DIR/$pkg_name.log";
     fi
-    ./build_one_spec.sh $spec_fine 2>&1 | tee "$LOG_DIR/$pkg_name.log"
-done < $SRC_RPM
+'
 
 echo "脚本执行完成"
