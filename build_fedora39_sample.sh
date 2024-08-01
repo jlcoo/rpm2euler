@@ -27,7 +27,7 @@ while read -r spec_fine; do
         echo "$spec_fine 已经构建成功，不用重复构建"
         continue
     fi
-    ./build_one_spec.sh $package 2>&1 | tee "$LOG_DIR/$pkg_name.log"
+    ./build_one_spec.sh $spec_fine 2>&1 | tee "$LOG_DIR/$pkg_name.log"
 done < $SRC_RPM
 
 echo "脚本执行完成"
