@@ -12,7 +12,7 @@ package=$SRC_RPM
 WORKDIR="$HOME/rpmbuild"
 
 #rpm -i "$package"
-if if [ -f "$WORKDIR/SPECS/$package" ]; then
+if [ -f "$WORKDIR/SPECS/$package" ]; then
     echo "-----------不用再调用 rpm -i-------------"
     #pkg_name=`python match.py $package`
     # 安装 .src.rpm 文件中的构建依赖项
